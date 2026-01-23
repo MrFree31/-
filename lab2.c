@@ -4,37 +4,57 @@
 int main()
 {
     SetConsoleOutputCP(CP_UTF8); //кодировка русского в VSCode
-    int c;
-    printf("Введите порядок матрицы:\n");
-    scanf("%d",&c);
-    double mat[c][c];
-
-    printf("Введите элементы матрицы через пробел:\n");
-    for(int i=0;i<c;++i)
-        for(int j=0;j<c;++j)
+    int m,n;
+    printf("Введите кол-во строк и столбцов матрицы(через пробел):\n");
+    scanf("%d %d",&m,&n);
+    double **mat = (double**)malloc(m * sizeof(double*));
+        for(int i = 0; i<m; i++){
+            mat[i] = (double*)malloc(n * sizeof(double));
+        }
+    printf("Введите элементы матрицы (через пробел) размер - %dх%d:\n",m,n);
+    for(int i=0;i<m;++i){
+        for(int j=0;j<n;++j){
         scanf("%lf",&mat[i][j]);
-        
-    double sumg=0,sump=0;
-    for(int i=0;i<c;++i)
-        sumg+=mat[i][i],sump+=mat[i][c-1-i];
-
-
-    double kvad[c][c];
-    for(int i=0;i<c;++i){
-        for(int j=0;j<c;++j){
-            kvad[i][j] = 0;
-            for(int k=0;k<c;++k)
-                kvad[i][j]+=mat[i][k]*mat[k][j];
-        }        
+        }  
     }
 
+    double sumg=0,sump=0;
+    for(int i=0;i<m;++i)
+        sumg+=mat[i][i],sump+=mat[i][m-1-i];
     printf("Сумма главной = %.2lf, Сумма побочной = %.2lf\n",sumg,sump);
+    
+    if(m==n){
+        double **kvad = (double**)malloc(m * sizeof(double*));
+        for (int i = 0; i<m;++i){
+            kvad[i]=(double*)malloc(n*sizeof(double));
+        }
+    
+    for(int i=0;i<m;++i){
+        for(int j=0;j<m;++j){
+            for(int k=0;k<m;++k)
+                kvad[i][j]+=mat[i][k]*mat[k][j];
+            }
+        }
+
     printf("Квадрат матрицы:\n");
-    for(int i=0;i<c;++i){
-        for(int j=0;j<c;++j){
+    for(int i=0;i<m;++i){
+        for(int j=0;j<n;++j){
             printf(" %3.0lf",kvad[i][j]);
         }
     printf("\n");
     }
+    for(int i=0;i<m;++i){
+        free(kvad[i]);
+    
+    }
+    free(kvad);
+    }
+    else{
+        printf("!!!Матрица не квадаратная!!!\n");
+    }
+   
+
+
+    
     return 0;
 }   
