@@ -23,8 +23,9 @@ for(int i=0;i<strlen(str);++i){
     }
 
 printf("2)Магический квадрат\n");
+int p = 0;
 print("Порядок матрицы\n");
-scanf("%d",p);
+scanf("%d", p);
 int **mat = (int**)malloc(p * sizeof(int*));
 for(int i=0;i<3;++i)
     mat[i] = (int*)malloc(p * sizeof(int));
@@ -36,11 +37,22 @@ for(int i=0;i<3;++i){
     }
 }
 
-int sg = 0,sp = 0;
-for(int i=0;i<p;++i)
-    sg += mat[i][i], sp += mat[i][3-1-i];
-    for(int j=0;;)
+int sg = 0,sp = 0,sumsrav = 0;
+for(int i=0; i<p; ++i){
+    sumsrav += mat[0][i];
+}
 
+int true_false = 1;
+for(int i=0;i<p;++i){
+    int sumstr = 0;
+    sg += mat[i][i], sp += mat[i][3-1-i];
+    for(int j=0;j<p;++j){
+        sumstr += mat[i][j];
+    }
+    if(sumstr != sumsrav){
+        printf("Наша матрица - никакой не магический квадрат."); //доделать ответ
+    }
+}
 if(sg==sp){
     printf("Наша матрица - Магический квадрат, Диагонали равны:%d",sg);
 }
