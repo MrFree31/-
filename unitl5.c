@@ -1,43 +1,37 @@
-#include "unitl5.h"
+#include "unitl5.h"//реализация
 #include <stdio.h>
-int sdp(ao,m1,m2,n1,n2){
+double sdp(char ao, int n, double** m1, double** m2, double** mr){
     //Сумма
-    if(ao=='+'){
-        if(m1!=m2||n1!=n2){
-        printf("*Ошибка* Размерность матриц не совпадает!\n");
-        return 1;
+    if(ao =='+'){
+        for(int i=0;i<n;++i){
+            for(int j=0;j<n;++j){
+                mr[i][j] = m1[i][j] + m2[i][j];
+            }  
         }
-        else{
-            for(int i=0;i<m1;++i){
-                for(int j=0;j<n1;++j){
-                    mat_result[i][j]=mat1[i][j]+mat2[i][j];
-
-                }
-        
-            }
-        }
+        return 0;
     }
     //Разница
     else if(ao=='-'){ 
-    if(m1!=m2||n1!=n2){printf("*Ошибка* Размерность матриц не совпадает!\n"); return 1;}
-    else{
-        for(int i=0;i<m1;++i){
-            for(int j=0;j<n1;++j){
-                mat_result[i][j]=mat1[i][j]-mat2[i][j];
+        for(int i=0;i<n;++i){
+            for(int j=0;j<n;++j){
+                mr[i][j] = m1[i][j] - m2[i][j];
 
-                }
-            
             }
         }
+        return 0;
     }
     //Произведение
-    else if(ao=='*'){
-        if(n1==m2){
-
+    else if(ao =='*'){
+        for(int i = 0; i < n; ++i) {
+            for(int j = 0; j < n; ++j) {
+                mr[i][j] = 0;
+                for(int k = 0; k < n; ++k) {
+                    mr[i][j] += m1[i][k] * m2[k][j];
+                }
+            }
         }
-        else{printf("*Ошибка* Размеры матрицы не подходят для произведения!"); return 1;}
-
+        return 0;
     }
     //Другой символ
-    else{printf("*Ошибка* Не в этот раз, дружок(!!!Только сумма, разница, произведение!!!)"); return 1;}
-}
+    else {printf("*Ошибка* Не в этот раз, дружок(!!!Только сумма, разница, произведение!!!)"); return 1;}
+}    
