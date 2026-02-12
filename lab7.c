@@ -15,9 +15,21 @@ for(int i=0;i<4;++i){
     printf("Введи год рождения %dго человека\n",i+1);
     scanf("%d",&p1[i].birthyear);
 }
-//Тест вывода
+for(int i=0; i<4; i++){
+    p2[i]=p1[i];
+}
+for(int i=0; i<3; i++){
+    for(int j = i+1; j<4; j++){
+        if(p2[i].birthyear>p2[j].birthyear){
+            struct person temp = p2[i];
+            p2[i]=p2[j];
+            p2[j]=temp;
+        }
+    }
+}
+//Вывод
 for(int i=0;i<4;++i){
-    printf("%dй кент: %s %s %d\n",i+1,p1[i].name,p1[i].surname,p1[i].birthyear);
+    printf("%dй кент из второго массива: %s %s %d\n",i+1,p2[i].name,p2[i].surname,p2[i].birthyear);
 }
 return 0;
 }
