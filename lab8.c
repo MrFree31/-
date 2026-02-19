@@ -9,7 +9,12 @@ struct person{
     float height;
 };
 
-
+int srav_str(const char *a, const char *b){
+    while (*a && (*a==*b)){
+        *a++,*b++;
+    }
+    return *(unsigned char*)a-*(unsigned char*)b;
+}
 
 int main(){
     SetConsoleOutputCP(CP_UTF8);
@@ -54,8 +59,8 @@ int main(){
 
             for(int k=0;op[k]!='\0'; k++){
                 char s = op[k];
-                if(s=='N'|| s=='n'){srav = strcmp(p[i].name, p[j].name);}
-                else if(s=='S'||s=='s'){srav = strcmp(p[i].surname, p[j].surname);}
+                if(s=='N'|| s=='n'){srav = srav_str(p[i].name, p[j].name);}
+                else if(s=='S'||s=='s'){srav = srav_str(p[i].surname, p[j].surname);}
                 else if(s=='B'||s=='b'){srav = (p[i].birthyear > p[j].birthyear) - (p[i].birthyear < p[j].birthyear);}                         
                 else if(s=='G'||s=='g'){srav = (p[i].gender > p[j].gender) - (p[i].gender < p[j].gender);}
                 else if(s=='H'||s=='h'){srav = (p[i].height > p[j].height) - (p[i].height < p[j].height);}
