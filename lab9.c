@@ -56,11 +56,41 @@ int main(){
         printf("Ошибка! Токенов нет🪘\n");
         return 1;
     }
+    char bin = '+';
+    int un = 1;
+    int znak = 1;
         double r = 0;
         while(t != NULL){
             if(srav_str(t,'+') == 0 || srav_str(t,'-') == 0){
-                if()
+                if(un){
+                    if(t[0] =='-'){
+                        znak = -1;
+                    }
+                }
+                else{
+                    bin = t[0];
+                    un = 1;
+                }
             }
+            else{
+                double x = atof(t) * znak;
+                znak = 1;
+
+                if(un){
+                    r = x;
+                }
+                else{
+                    if(znak == '+'){
+                        r += x;
+                    }
+                    else{
+                        r -= x;
+                    }
+                }
+                un = 0;
+            }
+            t = strtok(NULL," ");
         }
+    printf("Результат: %.5lf\n",r);
     return 0;
 }
