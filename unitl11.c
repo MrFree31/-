@@ -1,16 +1,18 @@
 #include "unitl11.h"
 #include <stdarg.h>
-
-void perem_arg(int k, int *sum, int *max, int *min, int *sred, ...){
+#include <stdio.h>
+void perem_arg(int k, int *sum, int *max, int *min, double *sred, ...){
     va_list argument;
     va_start(argument,sred);
 
     if (k <= 0){
         printf("Недостаточно аргументов(их нет)\n");
-        return 1;
+        return;
     }
     int x = va_arg(argument, int);
-    x = *sum = *max = *min = *sred;
+    *sum=x;
+    *max=x;
+    *min=x; 
 
     for(int i = 1; i<k; i++){
         int temp = va_arg(argument, int);
