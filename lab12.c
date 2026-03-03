@@ -29,13 +29,6 @@ int tok(const char *in, int *elem){//Разбивка строк
     return k;
 }
 
-void now(char *x, size_t size){ //нынешняя дата(now) 
-    time_t now = time(NULL);
-    struct tm *now_f = localtime(&now);
-    
-    strftime(x, size, "%d-%m-%Y", now_f);   
-}
-
 int dotw(int *e){
     struct tm dayw = {0};
     dayw.tm_year = e[0]-1900;/*отсчёт от 1900, мы берём 2026 или что бы там ни было,
@@ -46,10 +39,43 @@ int dotw(int *e){
     return dayw.tm_wday;
 }
 
+void month(int year, int month){
+    int dni[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    int d = dni[month - 1];
+    if (month == 2 && ((year%4 == 0 && year%100 != 0) || (year%400 == 0))){ //Високосность☺️
+        d = 29;
+    }
+    
+    int fotm = dotw((int[]){year,month,1});
+    const char *mes[] = {"Янв","Фев","Мар","Апр", "Май","Июнь","Июль","Авг","Сент","Окт","Нояб","Дек"};
+    printf("%s %d\n",mes[month-1],year);
+    printf("Пн Вт Ср Чт Пт Сб Вс\n");
+    int ots = (fotm + 6) % 7;
+    for(int i = 0; i<ots;i++){
+        printf("   ");
+    }
+    for(int i = 1;i<=d;i++){
+        printf("%3d", i);
+        if((ots + i) % 7 == 0){
+            printf("\n");
+        }
+    }
+}
+
+void now(char *x, size_t size){ //нынешняя дата(now) 
+    time_t now = time(NULL);
+    struct tm *now_f = localtime(&now);
+    
+    strftime(x, size, "%d-%m-%Y", now_f);   
+}
+
+
+
 int main(){
+    int out;
     SetConsoleOutputCP(CP_UTF8);
     char input[20];
-    printf("Введите формат(гггг.мм.дд, ..., now): ");
+    printf("Введите формат(гггг.мм.дд,гггг.мм, ..., now): ");
     fgets(input, sizeof(input),stdin);
 
     int len = strlen(input);
@@ -68,12 +94,19 @@ int main(){
         int elem[3] = {0}, k = 0;
         k = tok(input, elem);
         if(k == 3){
-            int out;
-            const char* week[] = {"Воскресенье","Понедельник","Вторник",\ 
+            
+            const char* week[] = {"Воскресенье","Понедельник(Hate mondays😾)","Вторник",\ 
                                     "Среда","Четверг","Пятница","Суббота"}; /*tm_wday хранит индекс,
                                     где 0 - воскресенье, как у "западных партнёров"*/
             out = dotw(elem);
             printf("Указаный день: %s\n", week[out]);
+        }
+        else if(k == 2){
+            if(elem[1]<1||elem[1]>12){
+                printf("Нет такого месяца(За пределами 1 и 12)\n");
+                return 1;
+            }
+            month(elem[0],elem[1]);
         }
     }
     return 0;
