@@ -75,7 +75,7 @@ int main(){
     int out;
     SetConsoleOutputCP(CP_UTF8);
     char input[20];
-    printf("Введите формат(гггг.мм.дд,гггг.мм, ..., now): ");
+    printf("Введите формат(гггг.мм.дд,гггг.мм, гггг, now): ");
     fgets(input, sizeof(input),stdin);
 
     int len = strlen(input);
@@ -95,7 +95,7 @@ int main(){
         k = tok(input, elem);
         if(k == 3){
             
-            const char* week[] = {"Воскресенье","Понедельник(Hate mondays😾)","Вторник",\ 
+            const char* week[] = {"Воскресенье","Понедельник(Hate mondays😾)","Вторник",
                                     "Среда","Четверг","Пятница","Суббота"}; /*tm_wday хранит индекс,
                                     где 0 - воскресенье, как у "западных партнёров"*/
             out = dotw(elem);
@@ -107,6 +107,26 @@ int main(){
                 return 1;
             }
             month(elem[0],elem[1]);
+        }
+
+        else if(k == 1){
+            if (elem[0] < 1 || elem[0] > 9999) {
+                printf("Год должен быть в диапазоне 1–9999.\n");
+                return 1;
+            }
+            printf("======================\n");
+            for(int m = 1;m<=12;m++){
+                month(elem[0],m);
+                printf("\n");
+                printf("======================\n");
+                
+            }
+            
+        }
+
+        else{
+            printf("Ошибка! Ввод не корректный!(Нужно: гггг.мм.дд,гггг.мм, гггг, now)");
+            return 1;
         }
     }
     return 0;
