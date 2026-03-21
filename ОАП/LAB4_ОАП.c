@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
         }
         printf("Loaded %s\n", argv[i]);
 
-        // Вывод глифа 
+        //Вывод побайтовый глифа 
         int str_byte = (G[i]->w + 7) / 8;
         for(int k = 0; k < G[i]->h; k++){
             outbytes(str_byte, G[i]->data + k * str_byte);
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         printf("Плотность глифа: %lf\n", G[i]->density);
     }
 
-    // Сравнение глифов (исправленная версия)
+    //Сравнение глифов
     if(N > 1) {
         printf("\nСравнение глифов...\n");
         for(int i = 1; i <= N; i++) {
@@ -296,14 +296,14 @@ int main(int argc, char *argv[])
                 if(G[i]->w != G[j]->w || G[i]->h != G[j]->h) continue;
 
                 int diff = 0;
-                int total = G[i]->w * G[i]->h;
+                int all = G[i]->w * G[i]->h;
                 for(int x = 0; x < G[i]->w; x++) {
                     for(int y = 0; y < G[i]->h; y++) {
                         if(get_pixel(G[i], x, y) != get_pixel(G[j], x, y))
                             diff++;
                     }
                 }
-                if(diff * 10 <= total) {
+                if(diff * 10 <= all) {
                     if(found) printf(", ");
                     printf("%d", G[j]->id);
                     found = 1;
@@ -314,14 +314,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Освобождение памяти
     for(int i = 1; i <= N; i++) {
         if(G[i]) {
             free(G[i]->data);
             free(G[i]);
         }
     }
-
-    printf("%d\n", N);
+    printf("Обработанных глифов: %d\n", N);
     return 0;
 }
