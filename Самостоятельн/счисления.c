@@ -1,8 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
-char* bin(int n){
+
+void get_schislenie(char* n, int *base){
+    if(n[0]=='0'){
+        //Двоичная
+        if(n[1] == 'b'|| n[1] == 'B'){
+            *base = 2;
+            int k = 2;
+            while(n[k] != '\0'){
+                n[k-2] = n[k];
+                k++;
+            }
+            n[k-2] = '\0';
+        }
+        //Шестнадцатиричная
+        else if(n[1] == 'x'|| n[1] == 'X'){
+            *base = 16;
+            int k = 2;
+            while(n[k] != '\0'){
+                n[k-2] = n[k];
+                k++;
+            }
+            n[k-2] = '\0';
+        }
+        else{
+            //Восьмиричная
+            *base = 8;
+            int k = 1;
+            while(n[k] != '\0'){
+            n[k-1] = n[k];
+            k++;
+            }
+            n[k-1] = '\0';
+        }        
+    }
+    else{
+        *base = 10;
+    }
+}
+
+char* dec_bin(int n){
     int id = 0;//шаги для движения по массиву bits
     int bits[32];/*Int (от англ. integer — целое число) — это фундаментальный тип данных в программировании,
                  предназначенный для хранения целых чисел без дробной части. Обычно занимает 4 байта (32 бита) памяти,
@@ -36,25 +76,79 @@ char* bin(int n){
         }
         bin_n[j] = '\0';
     }
-
+    
+    
     return bin_n;
 }
 
+int bin_dec(char* n){
+    int k = 0, dec = 0;
+    
+    while(n[k] != '\0'){//Берём длину строки для перевода, там типо степени по индексам выбираются
+        k++;
+    }
+    for(int i = 0; i<k; i++){
+        if(n[i]=='1'){
+            dec += 1*pow(2,k-1-i);
+        }
+        if(n[i]=='0'){
+            dec += 0*pow(2,k-1-i);
+        }
+    }
+    return dec;
+}
+
+char* bin_oct(char* n){
+    int k = 0;
+    char* oct = (char*)malloc(256 * sizeof(char));
+    char* troyka = (char*)malloc(4 * sizeof(char));//В восьмиричную переводят перебирая тройки битов.
+
+    while(n[k] != '\0'){//Берём длину строки для перевода, там типо степени по индексам выбираются
+        k++;
+    }
+    for(int i = 0; i<k; i++){
+        int temp = 0;
+        if(n[i]=='1'){
+            temp += 1*pow(2,k-1-i); 
+        }
+        if(n[i]=='0'){
+            temp += 0*pow(2,k-1-i);
+        }
+    }
+    return oct;
+
+}
+
 int main(){
-    int n;
+    char n[256];
     char schislenie[5];
-    printf("Which number? ");
-    scanf("%d", &n);
-    printf("Which schislenie?(bin...) ");
+    printf("Which number(enter with prefixes)? ");
+    scanf("%s", &n);
+    int base;
+    get_schislenie(n,&base);
+
+    printf("Which schislenie?(bin, dec...) ");
     scanf(" %s", &schislenie);
     
     if(strcmp(schislenie,"bin") == 0){
-        char *binar = bin(n);
-        printf("%s\n", binar);
+        if(base == 10){
+            int dec = atoi(n);
+            char *binar = dec_bin(dec);
+            printf("%s\n", binar);
+            free(binar);
+        }
+    }
+    else if(strcmp(schislenie,"dec") == 0){
+        if(base == 2){
+            int bin = bin_dec(n);
+            printf("%d\n", bin);
+        }
     }
     else{
-        printf("There is no else\n");
+        printf("There is no other ready\n");
     }
+
+    
 
     return 0;
 }
