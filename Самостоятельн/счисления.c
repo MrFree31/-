@@ -81,6 +81,38 @@ char* dec_bin(int n){
     return bin_n;
 }
 
+int* dec_oct(int n){
+    int id = 0;//шаги для движения по массиву bits
+    int nums[32];/*Int (от англ. integer — целое число) — это фундаментальный тип данных в программировании,
+                 предназначенный для хранения целых чисел без дробной части. Обычно занимает 4 байта (32 бита) памяти,
+                  позволяя хранить значения в диапазоне +-2 миллиарда. */
+
+    //Массив для вывода
+    //33 - '\0'
+    int *oct_n = (int*)malloc(33 * sizeof(int));
+
+    if(n == 0){
+        oct_n[0] = 0;
+        oct_n[1] = -1;// '\0' не впишем в int -> нужно -1, так как в остатке -1 не выйдет точно
+        return oct_n;
+    }
+
+    while(n>0){//Поскольку n - int, результат последующего деления будет сразу обрезаться до запятой, ползволяя отделять целое и остаток.
+        nums[id] = n % 8;
+        n = n/8;
+        id++;
+    }
+    
+    int j = 0;
+    for(int i = id-1; i>=0; i--){//Запишем нули и единицы в обратном порядке, как мы это делали бы выписывая из столбика на бумаге   
+            oct_n[j] = nums[i];
+            j++;
+    }
+    oct_n[j] = -1;//Тоже самое
+
+    return oct_n;
+}
+
 int bin_dec(char* n){
     int k = 0, dec = 0;
     
@@ -98,41 +130,74 @@ int bin_dec(char* n){
     return dec;
 }
 
-char* bin_oct(char* n){
-    int k = 0;
-    char* oct = (char*)malloc(256 * sizeof(char));
-    char* troyka = (char*)malloc(4 * sizeof(char));//В восьмиричную переводят перебирая тройки битов.
+int oct_dec(char* n){
+    int k = 0, dec = 0;
 
-    while(n[k] != '\0'){//Берём длину строки для перевода, там типо степени по индексам выбираются
+    while(n[k]!='\0'){
         k++;
     }
     for(int i = 0; i<k; i++){
-        int temp = 0;
-        if(n[i]=='1'){
-            temp += 1*pow(2,k-1-i); 
-        }
-        if(n[i]=='0'){
-            temp += 0*pow(2,k-1-i);
-        }
+        dec += (int) ((n[i]-'0') * pow(8,k-1-i)+0.5);/*В массиве у нас чары, в арифметике они дадут свой код.
+        '0' = 48, при вычитании '0' из любого числа выйдет оно само('7' = 55. '7'-'0' = 55 - 48 = 7). atoi типо не круто
+        pow - возвращает double, чтобы нивелировать погрешность добавим 0.5 для увеличения на один. Через смену типа обрубаем значения после запятой*/
     }
-    return oct;
+    return dec;
+}
 
+int hex_dec(char* n){
+    int k = 0, dec = 0,val;
+
+    while(n[k]!='\0'){
+        k++;
+    }
+    for(int i = 0; i<k; i++){
+        if(n[i]>= '0' && n[i] <= '9'){// Индексы вычитаем и получаем наше число
+            val = n[i] - '0';
+        }
+        else if(n[i] >= 'A' && n[i]<='F'){// В шестнадцатиричной системе используются знаки A-F со значениями 10-15. Также вычетаем индесы и прибавляем 10. 'A' - 'A' = 0 + 10 = 10 - наше значение
+            val = n[i] - 'A' + 10;
+        }
+        else if(n[i] >= 'a' && n[i] <= 'f'){//Same
+            val = n[i] - 'a' + 10;
+        }
+        else{
+            printf("Ошибка! Посторонние символы в hex-числе\n");
+            break;
+        }
+        dec += val * (int)(pow(16,k-1-i)+0.5);//Нивелирование флоата.
+    }
+    return dec;
 }
 
 int main(){
     char n[256];
     char schislenie[5];
-    printf("Which number(enter with prefixes)? ");
+    printf("Which number(enter with prefixes)?: ");
     scanf("%s", &n);
     int base;
     get_schislenie(n,&base);
 
-    printf("Which schislenie?(bin, dec...) ");
+    printf("Which schislenie?(bin, dec, oct...): ");
     scanf(" %s", &schislenie);
     
     if(strcmp(schislenie,"bin") == 0){
+        if(base == 2){
+            printf("%s",n);
+        }
+        if(base == 8){
+            int dec = oct_dec(n);
+            char *binar = dec_bin(dec);
+            printf("%s", binar);
+            free(binar);
+        }
         if(base == 10){
             int dec = atoi(n);
+            char *binar = dec_bin(dec);
+            printf("%s\n", binar);
+            free(binar);
+        }
+        if(base == 16){
+            int dec = hex_dec(n);
             char *binar = dec_bin(dec);
             printf("%s\n", binar);
             free(binar);
@@ -143,12 +208,52 @@ int main(){
             int bin = bin_dec(n);
             printf("%d\n", bin);
         }
+        if(base == 8){
+            int dec = oct_dec(n);
+            printf("%d\n",dec);
+        }
+        if(base == 10){
+            printf("%d",n);
+        }
+        if(base == 16){
+            int dec = hex_dec(n);
+            printf("%d",dec);
+        }
+    }
+    else if(strcmp(schislenie, "oct") == 0){
+        if(base == 2){
+            int dec = bin_dec(n);
+            int* oct = dec_oct(dec);
+            for(int i = 0; oct[i]!= -1; i++){
+                printf("%d",oct[i]);
+            }
+            free(oct);
+        }
+        if(base == 8){
+            for(int i = 0; n[i]!= '\0'; i++){
+                printf("%с",n[i]);
+            }
+        }
+        if(base == 10){
+            int dec = atoi(n);
+            int* oct = dec_oct(dec);
+            for(int i = 0; oct[i]!= -1; i++){
+                printf("%d",oct[i]);
+            }
+            free(oct);
+        }
+        if(base == 16){
+            int dec = hex_dec(n);
+            int* oct = dec_oct(dec);
+            for(int i = 0; oct[i]!= -1; i++){
+                printf("%d",oct[i]);
+            }
+            free(oct);
+        } 
     }
     else{
         printf("There is no other ready\n");
     }
-
     
-
     return 0;
 }
