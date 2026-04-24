@@ -4,7 +4,20 @@
 #include <math.h>
 
 
-void get_schislenie(char* n, int *base){
+void get_schislenie(char* n, int *base, int *sign, int *minus){
+    *minus = 0;
+    *sign = 1;
+    if(n[0] == '-'){
+        *sign = -1;
+        *minus = 1;
+        int i = 1, j = 0;
+        while(n[i] != '\0'){
+            n[j] = n[i];
+            i++;
+            j++;
+        }
+        n[j] = '\0';
+    }
     if(n[0]=='0'){
         //Двоичная
         if(n[1] == 'b'|| n[1] == 'B'){
@@ -113,6 +126,35 @@ int* dec_oct(int n){
     return oct_n;
 }
 
+char* dec_hex(int n){
+    char *hex_str = (char*)malloc(33 * sizeof(char));
+    if(n == 0){//Просто ноль
+        hex_str[0] = '0';
+        hex_str[1] = '\0';
+        return hex_str;
+    }
+
+    int id = 0;//шаги для движения по массиву nums
+    int nums[32];
+    
+    while(n > 0){
+        nums[id] = n % 16;
+        n = n / 16;
+        id++;
+    }
+    
+    int j = 0;
+    for (int i = id - 1; i >= 0; i--) {
+        if (nums[i] < 10)
+            hex_str[j++] = '0' + nums[i];
+        else
+            hex_str[j++] = 'A' + (nums[i] - 10);
+    }
+    hex_str[j] = '\0';
+    return hex_str;
+
+}
+
 int bin_dec(char* n){
     int k = 0, dec = 0;
     
@@ -174,49 +216,54 @@ int main(){
     char schislenie[5];
     printf("Which number(enter with prefixes)?: ");
     scanf("%s", &n);
-    int base;
-    get_schislenie(n,&base);
+    int base, sign, minus;
+    get_schislenie(n,&base, &sign, &minus);
 
     printf("Which schislenie?(bin, dec, oct...): ");
     scanf(" %s", &schislenie);
     
     if(strcmp(schislenie,"bin") == 0){
         if(base == 2){
+            if(sign == -1) printf("-");//У нас STRING!!! Добавляем минус печатаньем символа!!!
             printf("%s",n);
         }
         if(base == 8){
             int dec = oct_dec(n);
             char *binar = dec_bin(dec);
+            if(sign == -1) printf("-");//SAME!!!
             printf("%s", binar);
             free(binar);
         }
         if(base == 10){
             int dec = atoi(n);
             char *binar = dec_bin(dec);
+            if(sign == -1) printf("-");//SAME!!!
             printf("%s\n", binar);
             free(binar);
         }
         if(base == 16){
             int dec = hex_dec(n);
             char *binar = dec_bin(dec);
+            if(sign == -1) printf("-");//SAME!!!
             printf("%s\n", binar);
             free(binar);
         }
     }
     else if(strcmp(schislenie,"dec") == 0){
         if(base == 2){
-            int bin = bin_dec(n);
+            int bin = bin_dec(n)*sign;//Возвращаем int -> можно просто домножить на сам sign
             printf("%d\n", bin);
         }
         if(base == 8){
-            int dec = oct_dec(n);
+            int dec = oct_dec(n)*sign;//SAME(1)!!!
             printf("%d\n",dec);
         }
         if(base == 10){
-            printf("%d",n);
+            if(sign == -1) printf("-");//SAME!!!
+            printf("%s",n);
         }
         if(base == 16){
-            int dec = hex_dec(n);
+            int dec = hex_dec(n)*sign;//SAME(1)!!!
             printf("%d",dec);
         }
     }
@@ -224,19 +271,22 @@ int main(){
         if(base == 2){
             int dec = bin_dec(n);
             int* oct = dec_oct(dec);
+            if(sign == -1) printf("-");//SAME!!!
             for(int i = 0; oct[i]!= -1; i++){
                 printf("%d",oct[i]);
             }
             free(oct);
         }
         if(base == 8){
+            if(sign == -1) printf("-");//SAME!!!
             for(int i = 0; n[i]!= '\0'; i++){
-                printf("%с",n[i]);
+                printf("%c",n[i]);
             }
         }
         if(base == 10){
             int dec = atoi(n);
             int* oct = dec_oct(dec);
+            if(sign == -1) printf("-");//SAME!!!
             for(int i = 0; oct[i]!= -1; i++){
                 printf("%d",oct[i]);
             }
@@ -245,11 +295,15 @@ int main(){
         if(base == 16){
             int dec = hex_dec(n);
             int* oct = dec_oct(dec);
+            if(sign == -1) printf("-");//SAME!!!
             for(int i = 0; oct[i]!= -1; i++){
                 printf("%d",oct[i]);
             }
             free(oct);
         } 
+    }
+    else if(strcmp(schislenie, "hex") == 0){
+        
     }
     else{
         printf("There is no other ready\n");
