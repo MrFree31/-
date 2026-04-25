@@ -11,6 +11,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 
 #define ISBIT(n,x) (((01<<(n))&(x))?1:0)
 
@@ -136,11 +137,11 @@ int get_pixel(IMG *glif, int i, int j){//Переписал функцию пр�
 	if(i<0||i>=glif->w||j<0||j>=glif->h){
 		return 0;
 	}
-	int bytes_line = (glif->w+7)/8;
-	int byte_id = i*bytes_line+j/8;
+	int bytes_line = (glif->w+7)/8;//Байт в строке
+	int byte_id = i*bytes_line+j/8;//индекс конкретного байта
 	unsigned char byte = glif->data[byte_id];
 	int bit = 7 - (j%8);
-	return (byte>>bit)&1;
+	return (byte>>bit)&1;//Проверка смещением бита, как в первой работе
 }
 
 void diametr(IMG *glif){//Манхеттенская метрика
@@ -175,13 +176,17 @@ void svyaznost(IMG *glif){//Метод обхода в ширину графом
 	int elements = 0;
 	int steps_check_i[4] = {0,0,-1,1};//Массивы с шагами для проверки по вертикали и горизонтали
 	int steps_check_j[4] = {1,-1,0,0};
-	
+	int (*line)[2] = malloc(glif->h * glif->w * sizeof(*line));//Динамическая память от переполнения, если много глифов
+        if (!line) {
+          free(obhod);
+          glif->conn = -1;
+          return;
+        }
 	for(int i = 0; i < glif->w; i++){
 		for(int j = 0; j < glif->h; j++){
 			int id = glif->w * j + i;
 			if(get_pixel(glif, i, j) && !obhod[id]){
 				elements++;
-				int line[glif->h*glif->w][2];
 				int vert=0,edge=0;//точки и рёбра графа
 				line[edge][0] = i;
 				line[edge][1] = j;
@@ -205,9 +210,11 @@ void svyaznost(IMG *glif){//Метод обхода в ширину графом
 						}
 					}
 				}
+        
 			}
 		}
 	}
+  free(line);
 	free(obhod);
 	glif->conn = elements;
 }
@@ -227,84 +234,92 @@ void perimetr(IMG *glif){//Считаем перимерт по шагам во�
 	glif->perim = P;
 }
 
-int main( int argc, char *argv[])
-{       
-  long int c;
-	int len;
-	unsigned char *s;
-	unsigned long long *t;
-   N = argc-1;
-   for(int i = 1; i <= N; i++){ 
-		 G[i]=load_img(i, argv[i]);
-     if(G[i]==NULL){
-        printf("Глиф %s не загрузился - пропускаем\n", argv[i]);
-        continue;
-      }
-	 printf("Loaded %s\n",argv[i]);
-	 //Вывод побитовый глифа
-	 int str_byte = (G[i]->w+7)/8;
-	 for(int k = 0; k < G[i]->h; k++) outbytes(str_byte, G[i]->data+k*str_byte);
-	 }
+//===========================================================================================
+//===========================================================================================
+int main(int argc, char *argv[])
+{
+    SetConsoleOutputCP(CP_UTF8);
+    long long c;          
+    int len;
+    unsigned char *s;
+    unsigned long long *t;
 
-	 c=0;  
-	 t=(unsigned long long *)G[argc]->data;
-	 s=(unsigned char *)G[argc]->data;
-
-	 len=G[argc]->bytes;
-
-   for (int i=0; i<len/8; i++)
-       c+=popcnt64(t[i]);
-
-   for (int i=(len/8)*8; i<len; i++){
-       c+=popcnt8(s[i]);
-     G[argc]->count=c;
-     G[argc]->density = (double)G[argc]->count/(G[argc]->w*G[argc]->h);//Записываем плотность
-     svyaznost(G[argc]);//Записываем связность
-     perimetr(G[argc]);//Записываем периметр
-     diametr(G[argc]);//Записываем диаметр
-     printf("Периметр глифа: %d\n",G[argc]->perim);
-     printf("Связность глифа: %d\n",G[argc]->conn);
-     printf("Диаметр глифа: %d\n",G[argc]->diam);
-     printf("Плотность глифа: %lf\n",G[argc]->density);
-      }
-      //Сравнение
-    if(N>1){
-      printf(" Сравнение глифов...\n");
-      for(int i = 1; i <= N; i++){
-        if(G[i]==NULL){
-          printf("Глиф %s не загрузился - пропускаем\n", argv[i]);
-          continue;
-        }
-        printf("Глиф %d похож на: ", G[i]->id);
-        int sim = 1;
-        for(int j=1; j<=N;j++){
-          if(i==j||G[j]==NULL){
+    N = argc - 1;
+    for(int i = 1; i <= N; i++) {
+        G[i] = load_img(i, argv[i]);
+        if(G[i] == NULL) {
             continue;
-          }
-          if(G[i]->w!=G[j]->w||G[i]->h!=G[j]->h){
-            continue;
-          }
-          int diff = 0;
-          for(int x = 0;x<G[i]->w;x++){
-            for(int y = 0;y<G[i]->h;y++){
-              if(get_pixel(G[i],x,y)!=get_pixel(G[j],x,y)){
-                diff++;
-              }
-            }
-            int S = G[i]->w*G[i]->h;
-            if(diff*10<=S){
-              if(!sim){
-                printf(", ");
-                sim = 0;
-              }
-            }
-            if(sim){
-              printf("Нет совпадений");
-              printf("\n");
-            }
-          }
         }
-      }
+        printf("Loaded %s\n", argv[i]);
+
+        //Вывод побайтовый глифа 
+        int str_byte = (G[i]->w + 7) / 8;
+        for(int k = 0; k < G[i]->h; k++){
+            outbytes(str_byte, G[i]->data + k * str_byte);
+        }
+        c = 0;
+        t = (unsigned long long *)G[i]->data;
+        s = (unsigned char *)G[i]->data;
+        len = G[i]->bytes;
+
+
+        for(int k = 0; k < len / 8; k++)
+            c += popcnt64(t[k]);
+        for(int k = (len / 8) * 8; k < len; k++)
+            c += popcnt8(s[k]);
+
+        G[i]->count = c;
+        G[i]->density = (double)G[i]->count / (G[i]->w * G[i]->h);
+
+        svyaznost(G[i]);
+        perimetr(G[i]);
+        diametr(G[i]);
+
+        printf("Периметр глифа: %d\n", G[i]->perim);
+        printf("Связность глифа: %d\n", G[i]->conn);
+        printf("Диаметр глифа: %d\n", G[i]->diam);
+        printf("Плотность глифа: %lf\n", G[i]->density);
     }
-    printf("%d\n",N);
+
+    //Сравнение глифов
+    if(N > 1) {
+        printf("\nСравнение глифов...\n");
+        for(int i = 1; i <= N; i++) {
+            if(G[i] == NULL) {
+                printf("Глиф %s не загрузился - пропускаем\n", argv[i]);
+                continue;
+            }
+            printf("Глиф %d похож на: ", G[i]->id);
+            int found = 0;
+            for(int j = 1; j <= N; j++) {
+                if(i == j || G[j] == NULL) continue;
+                if(G[i]->w != G[j]->w || G[i]->h != G[j]->h) continue;
+
+                int diff = 0;
+                int all = G[i]->w * G[i]->h;
+                for(int x = 0; x < G[i]->w; x++) {
+                    for(int y = 0; y < G[i]->h; y++) {
+                        if(get_pixel(G[i], x, y) != get_pixel(G[j], x, y))
+                            diff++;
+                    }
+                }
+                if(diff * 10 <= all) {
+                    if(found) printf(", ");
+                    printf("%d", G[j]->id);
+                    found = 1;
+                }
+            }
+            if(!found) printf("Нет совпадений");
+            printf("\n");
+        }
+    }
+
+    for(int i = 1; i <= N; i++) {
+        if(G[i]) {
+            free(G[i]->data);
+            free(G[i]);
+        }
+    }
+    printf("Обработанных глифов: %d\n", N);
+    return 0;
 }
