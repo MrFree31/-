@@ -37,5 +37,71 @@ int gen(){//Ничего не принимается
 int main(){
     srand(time(NULL));//Инициализация генератора с кол-вом секунд с какого-то дня из 1970 года(Получается рандомный seed)
 
+    int number = gen();
+
+    int num_separation[4];//Опять разбиваем(В функции тоже самое делали, но ладно)
+    int temp = number;
+    for (int i = 3; i >= 0; i--) {
+        num_separation[i] = temp % 10;
+        temp /= 10;
+    }
+
+    int popitka = 1;
+    while(1){
+        int input;
+        printf("Введите число(только 4 цифры в числе(Повторных не должно быть)): ");
+        scanf("%d", &input);
+
+        if(input < 1000||input > 9999){
+            printf("Только 4 цифры в числе\n");
+            continue;
+        }
+
+        int in_separation[4];//Разбивка ввода игрока
+        temp = input;
+        for(int i = 3; i >= 0; i--){
+            in_separation[i] = temp % 10;
+            temp /= 10;
+        }
+
+        int uniqueInput = 1;//Уникальность
+        for(int i = 0;i < 3; i++){
+            for(int j = i + 1; j < 4; j++){
+                if(in_separation[i] == in_separation[j]){
+                    uniqueInput = 0;
+                    break;
+                }
+            }
+            if(!uniqueInput){
+                break;
+            }
+        }
+        if(!uniqueInput){
+            printf("Были введены цифры с повторами, так не надо делать\n");
+            continue;
+        }
+        //Счётчик верных/не верных, наконец-то
+        int b = 0;
+        int c = 0;
+
+        //Считаем верные/не верные
+        for(int i = 0; i < 4; i++){
+            if(in_separation[i] == num_separation[i]){//То же самое место
+                b++;
+            } 
+            else{
+                for(int j = 0; j < 4; j++){
+                    if(in_separation[i] == num_separation[j]){//Произошёл сдвиг(по фазе у меня)
+                        c++;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    
+
     return 0;
 }
+
