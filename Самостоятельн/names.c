@@ -16,8 +16,8 @@ int comp(person *a, person *b){
         if(diff){//Положит./отриц. значение - символы не равны
             return diff;
         }
-        return 0;//символы равны
     }
+    return 0;//символы равны
 }
 
 int main(int argc, char *argv[]){
@@ -53,26 +53,56 @@ int main(int argc, char *argv[]){
         FILE *f_in = fopen(argv[1], "r");
         if(!f_in){
             perror("Error! Opening input file");
+            free(names);
+            if(f_out){
+                fclose(f_out);
+            }
             return 1;
         }
         else{
             while(fgets(line, LINE_SIZE, f_in)){
                 line[strcspn(line, "\n")] = '\0';
                 person TEMP;
-                if(sscanf(line, "%64s, %d", TEMP.name, &TEMP.age) == 2){
+                if(sscanf(line, "%64s %d", TEMP.name, &TEMP.age) == 2){
                     int insert = 0;//Позиция вставки
                     while(insert<k && comp(&names[insert], &TEMP) <= 0){//пока не переполнили и наше значение не больше нуля(нужно пройти те, которые меньше и равны, только потом вставлять)
                         insert++;
                     }
-                    
-
+                    if(k >= capacity){//Дополнение массива
+                        capacity = capacity ? capacity * 2 : 4;//Тернарный оператор
+                        person *tmp = realloc(names, capacity * sizeof(person));
+                        if(!tmp){//Ошибка дополнения
+                            perror("Error! Reallocation for main array");
+                            free(names);
+                            fclose(f_in);
+                            if(f_out){
+                                fclose(f_out);
+                            }
+                            return 1;
+                        }
+                        names = tmp;
+                    }
+                    for(int i = k; i>insert; i--){//Сдвиг элементов для вставки
+                        names[i] = names[i - 1];
+                    }
+                    names[insert] = TEMP;
+                    k++;
                 }
-
             }
-            
+            fclose(f_in);
+            if(f_out) fclose(f_out);
         }
     }
-
-
+    FILE *f_res = fopen("names_s.txt", "w");
+    if(!f_res){
+        perror("Error! Opening file names_s.txt");
+        free(names);
+        return 1;
+    }
+    for(int i = 0; i<k; i++){
+        fprintf(f_res, "%s %d\n", names[i].name, names[i].age);
+    }
+    fclose(f_res);
+    free(names);
     return 0;
 }
