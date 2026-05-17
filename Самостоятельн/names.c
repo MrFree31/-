@@ -10,22 +10,50 @@ typedef struct person{
     int age;
 }person;
 
-int comp(person *a, person *b){
-    for(int i = 0; a->name[i] || b->name[i]; i++){// a->name[i] || b->name[i] - пока хотя бы один из элементов не ноль - '\0'
-        int diff = tolower((unsigned char)a->name[i]) - tolower((unsigned char)b->name[i]);//Кодировки разные коды символов имеют(включая отрицательные), поэтому приводим к беззнаковому char.
-        if(diff){//Положит./отриц. значение - символы не равны
-            return diff;
+int comp(person *a, person *b, int sort){//Параметр sort - сортировка по возрасту
+    if(sort){//Если sort не нулевой, то проверяем на равенство возраста. 
+        if(a->age != b->age){
+            return a->age-b->age; //Выдаём результат
         }
+        //Если всё таки равно, то сортируем по имени.
+        for(int i = 0; a->name[i] || b->name[i]; i++){// a->name[i] || b->name[i] - пока хотя бы один из элементов не ноль - '\0'
+            int diff = tolower((unsigned char)a->name[i]) - tolower((unsigned char)b->name[i]);//Кодировки разные коды символов имеют(включая отрицательные), поэтому приводим к беззнаковому char.
+            if(diff){//Положит./отриц. значение - символы не равны
+                return diff;
+            }
+        }
+        return 0;
     }
-    return 0;//символы равны
+    else{//Противоположный случай при sort = 0 -> Имя, возраст.
+        for(int i = 0; a->name[i] || b->name[i]; i++){// a->name[i] || b->name[i] - пока хотя бы один из элементов не ноль - '\0'
+            int diff = tolower((unsigned char)a->name[i]) - tolower((unsigned char)b->name[i]);//Кодировки разные коды символов имеют(включая отрицательные), поэтому приводим к беззнаковому char.
+            if(diff){//Положит./отриц. значение - символы не равны
+                return diff;
+            }
+        }
+        return a->age - b->age;
+    }
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){//МОЖНО ДОБАВИТЬ "AGE" и "REV"
+    int sort = 0;//Переменная для сортировки
+    int revers = 0;//Переменная для обратного порядка
     person *names = NULL;
     int k = 0;//Счётчик обхода
     int capacity = 0;
     char line[LINE_SIZE];
-    FILE *f_out = fopen("names_s.txt", "r+");//Проверяем содержание выходного файла
+
+    //ДОП УСЛОВИЯ
+    for(int i = 1; i<argc; i++){
+        if(strcmp(argv[i], "age") == 0){
+            sort = 1;
+        }
+        if(strcmp(argv[i], "rev") == 0){
+            revers = 1;
+        }
+    }
+
+    FILE *f_out = fopen("names_s.txt", "r");
 
     if(f_out != NULL){//Проверяем содержание выходного файла
         while(fgets(line, LINE_SIZE, f_out)){
@@ -65,9 +93,22 @@ int main(int argc, char *argv[]){
                 person TEMP;
                 if(sscanf(line, "%64s %d", TEMP.name, &TEMP.age) == 2){
                     int insert = 0;//Позиция вставки
-                    while(insert<k && comp(&names[insert], &TEMP) <= 0){//пока не переполнили и наше значение не больше нуля(нужно пройти те, которые меньше и равны, только потом вставлять)
+                    while(insert<k && (revers ? comp(&names[insert], &TEMP, sort) >= 0 : comp(&names[insert], &TEMP, sort) <= 0)){//пока не переполнили и наше значение не больше нуля{если реверс, то не меньше}(нужно пройти те, которые меньше(больше для реверса) и равны, только потом вставлять)
                         insert++;
                     }
+
+                    //Проверка дублей при добавлении с одинаковым аргументом несколько раз
+                    int dupl = 0;//Переменная для дублей
+                    if(insert > 0 && strcmp(names[insert-1].name, TEMP.name) == 0 && names[insert - 1].age == TEMP.age){//Можно comp либо strcmp - по барабану
+                        dupl = 1;//перепрыгиваем на следующую итерацию при равенстве
+                    }
+                    if(insert < k && strcmp(names[insert].name, TEMP.name) == 0 && names[insert].age == TEMP.age){//Можно comp либо strcmp - по барабану
+                        dupl = 1;//перепрыгиваем на следующую итерацию при равенстве
+                    }
+                    if(dupl){
+                        continue;
+                    }
+
                     if(k >= capacity){//Дополнение массива
                         capacity = capacity ? capacity * 2 : 4;//Тернарный оператор
                         person *tmp = realloc(names, capacity * sizeof(person));
@@ -90,9 +131,11 @@ int main(int argc, char *argv[]){
                 }
             }
             fclose(f_in);
-            if(f_out) fclose(f_out);
         }
     }
+
+    if(f_out) fclose(f_out);
+
     FILE *f_res = fopen("names_s.txt", "w");
     if(!f_res){
         perror("Error! Opening file names_s.txt");
@@ -103,6 +146,21 @@ int main(int argc, char *argv[]){
         fprintf(f_res, "%s %d\n", names[i].name, names[i].age);
     }
     fclose(f_res);
+    //Вывод статистики
+    if(k > 0){
+        int min = names[0].age;
+        int max = names[0].age;
+        for(int i = 0; i < k; i++){
+            if(names[i].age < min){
+                min = names[i].age;
+            }
+            if(names[i].age > max){
+                max = names[i].age;
+            }
+        }
+        printf("Names count: %d\n", k);
+        printf("Ages in range from %d to %d\n", min, max);
+    }
     free(names);
     return 0;
 }

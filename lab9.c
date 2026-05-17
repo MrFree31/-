@@ -6,7 +6,7 @@
 
 int srav_str(const char *a, const char *b){
     while (*a && (*a==*b)){
-        *a++,*b++;
+        a++,b++;
     }
     return *(unsigned char*)a-*(unsigned char*)b;
 }
@@ -39,11 +39,12 @@ void ishod(const char *a, char *b){
 }
 
 int main(){
-    setConsoleOutputCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
     char A[100];
+    int first = 1;
     printf("Введите выражение: \n");
     fgets(A,sizeof(A),stdin);
-    A[strcspn(A,'\n')]='\0';//индекс переноса строки
+    A[strcspn(A,"\n")]='\0';//индекс переноса строки
     if(strlen(A) == 0){
         printf("Пустая строка!\n");
         return 1;
@@ -61,7 +62,7 @@ int main(){
     int znak = 1;
         double r = 0;
         while(t != NULL){
-            if(srav_str(t,'+') == 0 || srav_str(t,'-') == 0){
+            if(srav_str(t,"+") == 0 || srav_str(t,"-") == 0){
                 if(un){
                     if(t[0] =='-'){
                         znak = -1;
@@ -76,11 +77,12 @@ int main(){
                 double x = atof(t) * znak;
                 znak = 1;
 
-                if(un){
+                if(first){
                     r = x;
+                    first = 0;
                 }
                 else{
-                    if(znak == '+'){
+                    if(bin == '+'){
                         r += x;
                     }
                     else{
