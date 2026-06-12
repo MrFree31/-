@@ -1,0 +1,44 @@
+n = int(input("Количество вершин: "))
+
+full_graph = n * (n - 1) // 2
+tree = n - 1
+
+print("Полный граф:", full_graph)
+print("Дерево:", tree)
+
+
+
+degrees = list(map(int, input("Степени через пробел: ").split()))
+
+n = len(degrees)
+
+if sum(degrees) % 2 != 0:
+    print("Граф невозможен: сумма степеней нечётна")
+elif max(degrees) >= n:
+    print("Граф невозможен: степень >= числа вершин")
+else:
+    print("Граф возможен")
+
+
+
+
+
+n = int(input("Количество вершин: "))
+
+print("1 - пустой граф")
+print("2 - полный граф")
+print("3 - дерево")
+print("4 - цикл")
+
+t = int(input("Тип графа: "))
+
+if t == 1:
+    chrom = 1
+elif t == 2:
+    chrom = n
+elif t == 3:
+    chrom = 1 if n == 1 else 2
+elif t == 4:
+    chrom = 2 if n % 2 == 0 else 3
+
+print("Хроматическое число =", chrom)

@@ -1,0 +1,32 @@
+import heapq
+
+graph = {
+    'A': {'B': 1},
+    'B': {'A': 1, 'C': 2, 'D': 2, 'E': 7},
+    'C': {'B': 2, 'E': 3},
+    'D': {'B': 2, 'E': 4},
+    'E': {'B': 7, 'C': 3, 'D': 4}
+}
+
+def dijkstra(graph, start, end):
+    distances = {v: float('inf') for v in graph}
+    distances[start] = 0
+
+    pq = [(0, start)]
+
+    while pq:
+        current_dist, current_vertex = heapq.heappop(pq)
+
+        if current_vertex == end:
+            return current_dist
+
+        for neighbor, weight in graph[current_vertex].items():
+            distance = current_dist + weight
+
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(pq, (distance, neighbor))
+
+    return distances[end]
+
+print("Кратчайшее расстояние:", dijkstra(graph, 'A', 'E'))
